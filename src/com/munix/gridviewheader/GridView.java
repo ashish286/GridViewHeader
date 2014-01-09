@@ -40,6 +40,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	private int lastPos=0;
 	private OnScrollListener listenerFromActivity; 
 	private FixedViewInfo mHeaderViewInfo;
+	private Boolean setFixed=false;
 	
 	public GridView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -202,6 +203,15 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     	this.addHeaderView(v, null, false);
     }
 
+    /**
+     * Permite cambiar entre una cabecera fija o scrollable
+     * @param Boolean fixed
+     */
+    public void setFixedHeader( Boolean fixed )
+    {
+    	this.setFixed = fixed;
+    }
+    
     private void drawHeaders() 
     {
     	if ( mHeaderViewInfo != null )
@@ -209,7 +219,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	    	int startPos = -mScrollOfsset; 
 	    	//Para evitar ciclos infinitos de onDraw / drawHeaders porque si en onDraw le pongo el topMargin efectúa
 	    	//repintado, entonces llama a drawHeaders y así....
-	    	if ( lastPos != startPos) 
+	    	if ( lastPos != startPos && !setFixed) 
 	    	{
 	    		if ( mScrollOfsset <= headerViewHeight )
 	    		{

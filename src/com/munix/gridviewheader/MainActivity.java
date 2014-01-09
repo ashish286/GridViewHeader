@@ -25,6 +25,9 @@ public class MainActivity extends Activity
 		
 		TestAdapter adapter = new TestAdapter(this, strings);
 		list.setAdapter(adapter);
+		
+		//Puedes dejar la cabecera fija
+		//list.setFixedHeader(true);
 	}
 	
 	public void fun( View v )
