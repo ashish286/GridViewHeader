@@ -1,7 +1,5 @@
 package com.munix.gridviewheader;
 
-import java.util.HashMap;
-import java.util.Map;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.os.Build;
@@ -12,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ListView.FixedViewInfo;
@@ -36,7 +35,6 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	private int headerViewHeight = 0;
 	private ListAdapter originalAdapter;
 	private BaseAdapter newAdapter;
-	private Map<Integer,Integer> adapterViewSizes = new HashMap<Integer,Integer>();
 	private int lastPos=0;
 	private OnScrollListener listenerFromActivity; 
 	private FixedViewInfo mHeaderViewInfo;
@@ -109,43 +107,40 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		}
 		
 		@Override
+		public int getViewTypeCount() 
+		{
+			return 2;
+		}
+		
+		@Override
+		public int getItemViewType( int position )
+		{
+			if ( position < GridView.this.getNumColumnsCompat() )
+			{
+				return IGNORE_ITEM_VIEW_TYPE;
+			}else{
+				return 1;
+			}
+		}
+		
+		@Override
 		public View getView(int position, View convert, ViewGroup parent) 
 		{
 			if ( position < GridView.this.getNumColumnsCompat() )
 			{
-				if ( originalAdapter.getCount() > position )
-				{
-					convert = originalAdapter.getView(position, convert, parent);
-				}else{
-					convert = originalAdapter.getView(0, convert, parent);
-				}
+				ViewGroup v = new LinearLayout( getContext() );
 				ViewGroup.LayoutParams mParams = new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, headerViewHeight );
 				mParams.height = headerViewHeight;
-				convert.setLayoutParams( mParams );
-				convert.setVisibility(View.INVISIBLE);
+				v.setLayoutParams( mParams );
+				v.setVisibility(View.INVISIBLE);
+				return v;
 			}else{
 				int realPosition = position - GridView.this.getNumColumnsCompat();
 				convert = originalAdapter.getView(realPosition, convert, parent);
-				ViewGroup.LayoutParams mParams = new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT );
-		        mParams.height = measureViewHeightAtPosition(convert,getNumColumnsCompat());
-		        convert.setLayoutParams( mParams );
-		        convert.setVisibility(View.VISIBLE);
 			}
 			return convert;
 		}
     };
-    
-    private int measureViewHeightAtPosition( View v, int position )
-    {
-    	if ( !adapterViewSizes.containsKey(position) )
-    	{
-    		v.setLayoutParams(new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-    		v.measure(MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
-    		adapterViewSizes.put(position, v.getMeasuredHeight() );
-    	}
-    	return adapterViewSizes.get(position);	
-
-    }
     
     /**
      * Añade la vista al layout
@@ -153,7 +148,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
      * @param data extra data
      * @param isSelectable foo
      */
-	public void addHeaderView(View v, Object data, boolean isSelectable) 
+	public void addHeaderView( final View v, final Object data, final boolean isSelectable) 
 	{
         mHeaderViewInfo = new ListView(getContext()).new FixedViewInfo();
         mHeaderViewInfo.view = v;
@@ -162,13 +157,13 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 
         setupView(v);
         
-        int topPadding = this.getPaddingTop();
+        int topPadding = getPaddingTop();
         if(initialTopPadding == 0){
         	initialTopPadding = topPadding;
         }
         headerViewHeight = v.getMeasuredHeight();
         
-        RelativeLayout parent = (RelativeLayout)this.getParent();
+        RelativeLayout parent = (RelativeLayout)getParent();
         parent.addView(v, 0);
         v.bringToFront();
     }
@@ -227,10 +222,8 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 			    	mParams.topMargin = startPos;
 			    	mHeaderViewInfo.view.setLayoutParams(mParams);
 			    	mHeaderViewInfo.view.setVisibility( View.VISIBLE );
-			    	Utilities.log("mHeaderViewInfo.view.setVisibility( View.VISIBLE );");
 	    		}else{
 	    			mHeaderViewInfo.view.setVisibility( View.GONE );
-	    			Utilities.log("mHeaderViewInfo.view.setVisibility( View.GONE );");
 	    		}
 	    	}
 	    	lastPos = startPos;
