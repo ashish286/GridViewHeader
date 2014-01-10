@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -27,7 +28,7 @@ import android.app.Activity;
  * @author munix
  *
  */
-public class GridView extends android.widget.GridView implements OnScrollListener
+public class GridView extends android.widget.GridView implements OnScrollListener, android.widget.AdapterView.OnItemClickListener
 {
 	private int mScrollOfsset;
 	private int initialTopPadding=0;
@@ -36,7 +37,8 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	private ListAdapter originalAdapter;
 	private BaseAdapter fakeAdapter;
 	private int lastPos=0;
-	private OnScrollListener listenerFromActivity; 
+	private OnScrollListener scrollListenerFromActivity; 
+	private OnItemClickListener clickListenerFromActivity;
 	private FixedViewInfo mHeaderViewInfo;
 	private Boolean setFixed=false;
 	private Boolean bringToFront=true;
@@ -62,9 +64,16 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	}
 	
 	@Override
+	public void setOnItemClickListener( OnItemClickListener l )
+	{
+		clickListenerFromActivity = l;
+		super.setOnItemClickListener(this);
+	}
+	
+	@Override
 	public void setOnScrollListener( OnScrollListener l )
 	{
-		listenerFromActivity = l;
+		scrollListenerFromActivity = l;
 		//Guardo la referencia del scroll para poder usar ambos
 		super.setOnScrollListener(this);
 	}
@@ -311,9 +320,9 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 				mScrollOfsset = ((firstVisibleItem / this.getNumColumnsCompat()) * child.getMeasuredHeight()) + totalHeaderHeight - child.getTop();
 			}
 		}
-		if ( listenerFromActivity != null )
+		if ( scrollListenerFromActivity != null )
 		{
-			listenerFromActivity.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
+			scrollListenerFromActivity.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
 		}
 		
 	}
@@ -334,9 +343,18 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) 
 	{
-		if ( listenerFromActivity != null )
+		if ( scrollListenerFromActivity != null )
 		{
-			listenerFromActivity.onScrollStateChanged(view, scrollState);
+			scrollListenerFromActivity.onScrollStateChanged(view, scrollState);
+		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapter, View view, int position, long id) 
+	{
+		if ( clickListenerFromActivity != null )
+		{
+			clickListenerFromActivity.onItemClick(adapter, view, position - GridView.this.getNumColumnsCompat(), id);
 		}
 	}
 }
