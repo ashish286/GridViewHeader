@@ -39,7 +39,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	private OnScrollListener listenerFromActivity; 
 	private FixedViewInfo mHeaderViewInfo;
 	private Boolean setFixed=false;
-	private Boolean bringToFront=false;
+	private Boolean bringToFront=true;
 	
 	public GridView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
