@@ -1,6 +1,7 @@
 package com.munix.gridviewheader;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -42,6 +43,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	private FixedViewInfo mHeaderViewInfo;
 	private Boolean setFixed=false;
 	private Boolean bringToFront=true;
+	private int verticalSpacing=0;
 	
 	public GridView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -64,6 +66,23 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	}
 	
 	@Override
+	public void onDetachedFromWindow()
+	{
+		if ( originalAdapter != null )
+		{
+			originalAdapter.unregisterDataSetObserver( originalAdapterDataSetObserver );
+		}
+		super.onDetachedFromWindow();
+	}
+	
+	@Override
+	public void setVerticalSpacing( int spacing )
+	{
+		this.verticalSpacing = spacing;
+		super.setVerticalSpacing(spacing);
+	}
+	
+	@Override
 	public void setOnItemClickListener( OnItemClickListener l )
 	{
 		clickListenerFromActivity = l;
@@ -83,8 +102,25 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     {
     	originalAdapter = a;
     	fakeAdapter = new mListAdapter();
+		originalAdapter.registerDataSetObserver( originalAdapterDataSetObserver );
+    	
     	super.setAdapter(fakeAdapter);
     }
+    
+    DataSetObserver originalAdapterDataSetObserver = new DataSetObserver()
+	{
+		@Override
+		public void onChanged()
+		{
+			fakeAdapter.notifyDataSetChanged();
+		}
+		
+		@Override
+		public void onInvalidated()
+		{
+			fakeAdapter.notifyDataSetInvalidated();
+		}
+	};
     
     /**
      * Adaptador que recubre el original para poder dar espacio a la cabecera
@@ -265,11 +301,11 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     @Override
     protected void onDraw(Canvas canvas) 
     {
-    	super.onDraw(canvas);
     	if ( fakeAdapter != null )
     	{
     		drawHeaders();
     	}
+    	super.onDraw(canvas);
     }
     
     @Override
@@ -306,6 +342,20 @@ public class GridView extends android.widget.GridView implements OnScrollListene
         return getNumColumns();
     }
     
+    private int getVerticalSpacingCompat() 
+    {
+    	if (Build.VERSION.SDK_INT >= 16) {
+            return getVerticalSpacingCompat16();
+    	}else{
+    		return this.verticalSpacing;
+    	}
+    }
+    	
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+	private int getVerticalSpacingCompat16() {
+        return getVerticalSpacing();
+    }
+    
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) 
 	{
@@ -317,7 +367,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 			{
 				View child = this.getChildAt( this.getNumColumnsCompat() );
 
-				mScrollOfsset = ((firstVisibleItem / this.getNumColumnsCompat()) * child.getMeasuredHeight()) + totalHeaderHeight - child.getTop();
+				mScrollOfsset = ((firstVisibleItem / this.getNumColumnsCompat()) * child.getMeasuredHeight()) + totalHeaderHeight - child.getTop() + this.getVerticalSpacingCompat();
 			}
 		}
 		if ( scrollListenerFromActivity != null )
