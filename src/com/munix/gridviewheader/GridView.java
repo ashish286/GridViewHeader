@@ -102,8 +102,9 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     {
     	originalAdapter = a;
     	fakeAdapter = new mListAdapter();
-		originalAdapter.registerDataSetObserver( originalAdapterDataSetObserver );
-    	
+		//Registramos un DataSetObserver para que cuando se produzcan cambios en el adaptador original lo podamos reflejar
+    	//en el fakeAdapter
+    	originalAdapter.registerDataSetObserver( originalAdapterDataSetObserver );
     	super.setAdapter(fakeAdapter);
     }
     
