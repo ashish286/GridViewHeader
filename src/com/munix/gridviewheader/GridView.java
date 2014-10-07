@@ -364,12 +364,13 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 			int count  = this.getChildCount();
 			int totalHeaderHeight = getTotalHeaderHeight();
 			
-			if( count > this.getNumColumnsCompat() )
-			{
-				View child = this.getChildAt( this.getNumColumnsCompat() );
-
-				mScrollOfsset = ((firstVisibleItem / this.getNumColumnsCompat()) * child.getMeasuredHeight()) + totalHeaderHeight - child.getTop() + this.getVerticalSpacingCompat();
-			}
+			if (count > this.getNumColumnsCompat()) {
+                		View child = this.getChildAt(this.getNumColumnsCompat());
+                		if (child != null) {
+                    			mScrollOfsset = ((firstVisibleItem / this.getNumColumnsCompat()) * child.getMeasuredHeight()) + totalHeaderHeight - child.getTop()
+                            			+ this.getVerticalSpacingCompat();
+                		}
+            		}
 		}
 		if ( scrollListenerFromActivity != null )
 		{
