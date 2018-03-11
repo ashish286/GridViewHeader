@@ -25,7 +25,7 @@ import android.app.Activity;
  * addHeaderView(View v, Object data, boolean isSelectable);
  * addHeaderView(View v);
  * No funciona con ArrayAdapter sino con adapters extendidos de BaseAdapter
- * 
+ *
  * @author munix
  *
  */
@@ -38,13 +38,13 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	private ListAdapter originalAdapter;
 	private BaseAdapter fakeAdapter;
 	private int lastPos=0;
-	private OnScrollListener scrollListenerFromActivity; 
+	private OnScrollListener scrollListenerFromActivity;
 	private OnItemClickListener clickListenerFromActivity;
 	private FixedViewInfo mHeaderViewInfo;
 	private Boolean setFixed=false;
 	private Boolean bringToFront=true;
 	private int verticalSpacing=0;
-	
+
 	public GridView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		init(context);
@@ -59,12 +59,12 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		super(context);
 		init(context);
 	}
-	
+
 	private void init(Context context)
 	{
 		super.setOnScrollListener(this);
 	}
-	
+
 	@Override
 	public void onDetachedFromWindow()
 	{
@@ -74,21 +74,21 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		}
 		super.onDetachedFromWindow();
 	}
-	
+
 	@Override
 	public void setVerticalSpacing( int spacing )
 	{
 		this.verticalSpacing = spacing;
 		super.setVerticalSpacing(spacing);
 	}
-	
+
 	@Override
 	public void setOnItemClickListener( OnItemClickListener l )
 	{
 		clickListenerFromActivity = l;
 		super.setOnItemClickListener(this);
 	}
-	
+
 	@Override
 	public void setOnScrollListener( OnScrollListener l )
 	{
@@ -96,7 +96,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		//Guardo la referencia del scroll para poder usar ambos
 		super.setOnScrollListener(this);
 	}
-    
+
     @Override
     public void setAdapter( ListAdapter a )
     {
@@ -107,7 +107,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     	originalAdapter.registerDataSetObserver( originalAdapterDataSetObserver );
     	super.setAdapter(fakeAdapter);
     }
-    
+
     DataSetObserver originalAdapterDataSetObserver = new DataSetObserver()
 	{
 		@Override
@@ -115,14 +115,14 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		{
 			fakeAdapter.notifyDataSetChanged();
 		}
-		
+
 		@Override
 		public void onInvalidated()
 		{
 			fakeAdapter.notifyDataSetInvalidated();
 		}
 	};
-    
+
     /**
      * Adaptador que recubre el original para poder dar espacio a la cabecera
      * @author munix
@@ -131,19 +131,21 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     public class mListAdapter extends BaseAdapter
     {
 		@Override
-		public int getCount() 
+		public int getCount()
 		{
 			return originalAdapter.getCount() > 0 ? originalAdapter.getCount() + GridView.this.getNumColumnsCompat() : 0;
 		}
 
+
+
 		@Override
-		public Object getItem(int position) 
+		public Object getItem(int position)
 		{
 			return originalAdapter.getItem(position + GridView.this.getNumColumnsCompat());
 		}
 
 		@Override
-		public long getItemId(int position) 
+		public long getItemId(int position)
 		{
 			return originalAdapter.getItemId(position + GridView.this.getNumColumnsCompat());
 		}
@@ -152,13 +154,13 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		{
 			View view;
 		}
-		
+
 		@Override
-		public int getViewTypeCount() 
+		public int getViewTypeCount()
 		{
 			return 2;
 		}
-		
+
 		@Override
 		public int getItemViewType( int position )
 		{
@@ -169,9 +171,9 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 				return 1;
 			}
 		}
-		
+
 		@Override
-		public View getView(int position, View convert, ViewGroup parent) 
+		public View getView(int position, View convert, ViewGroup parent)
 		{
 			if ( position < GridView.this.getNumColumnsCompat() )
 			{
@@ -190,14 +192,14 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 			return convert;
 		}
     };
-    
+
     /**
      * Añade la vista al layout
      * @param v la vista
      * @param data extra data
      * @param isSelectable foo
      */
-	public void addHeaderView( final View v, final Object data, final boolean isSelectable) 
+	public void addHeaderView( final View v, final Object data, final boolean isSelectable)
 	{
         mHeaderViewInfo = new ListView(getContext()).new FixedViewInfo();
         mHeaderViewInfo.view = v;
@@ -205,13 +207,13 @@ public class GridView extends android.widget.GridView implements OnScrollListene
         mHeaderViewInfo.isSelectable = isSelectable;
 
         setupView(v);
-        
+
         int topPadding = getPaddingTop();
         if(initialTopPadding == 0){
         	initialTopPadding = topPadding;
         }
         headerViewHeight = v.getMeasuredHeight();
-        
+
         RelativeLayout parent = (RelativeLayout)getParent();
         parent.addView(v, 0);
         if ( bringToFront )
@@ -219,29 +221,29 @@ public class GridView extends android.widget.GridView implements OnScrollListene
         	v.bringToFront();
         }
     }
-	
+
 	public FixedViewInfo getHeaderView()
 	{
 		return mHeaderViewInfo;
 	}
-    
+
     private void setupView(View v)
     {
     	boolean isLayedOut = !((v.getRight()==0) && (v.getLeft()==0) && (v.getTop()==0) && (v.getBottom()==0));
-    	
+
     	if(v.getMeasuredHeight() != 0 && isLayedOut ) return;
-    	
+
     	if(mDisplayWidth == 0){
     		DisplayMetrics displaymetrics = new DisplayMetrics();
         	((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
     		mDisplayWidth = displaymetrics.widthPixels;
-    		
+
     	}
     	v.setLayoutParams(new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
     	v.measure(MeasureSpec.makeMeasureSpec(mDisplayWidth, MeasureSpec.AT_MOST), MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
     	v.layout(0, getTotalHeaderHeight(), v.getMeasuredWidth(), getTotalHeaderHeight() + v.getMeasuredHeight());
     }
-    
+
     /**
      * Añade la vista al layout
      * @param v
@@ -258,7 +260,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     {
     	return bringToFront;
     }
-    
+
     /**
      * Define si la cabecera se pinta por delante del scroll o si el scroll va por encima y la cabecera está fija
      * @param Boolean isInFront
@@ -267,7 +269,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     {
     	bringToFront = isInFront;
     }
-    
+
     /**
      * Permite cambiar entre una cabecera fija o scrollable
      * @param Boolean fixed
@@ -276,15 +278,15 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     {
     	this.setFixed = fixed;
     }
-    
-    private void drawHeaders() 
+
+    private void drawHeaders()
     {
     	if ( mHeaderViewInfo != null )
     	{
-	    	int startPos = -mScrollOfsset; 
+	    	int startPos = -mScrollOfsset;
 	    	//Para evitar ciclos infinitos de onDraw / drawHeaders porque si en onDraw le pongo el topMargin efectúa
 	    	//repintado, entonces llama a drawHeaders y así....
-	    	if ( lastPos != startPos && !setFixed && bringToFront) 
+	    	if ( lastPos != startPos && !setFixed && bringToFront)
 	    	{
 	    		if ( mScrollOfsset <= headerViewHeight )
 	    		{
@@ -300,7 +302,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     	}
     }
     @Override
-    protected void onDraw(Canvas canvas) 
+    protected void onDraw(Canvas canvas)
     {
     	if ( fakeAdapter != null )
     	{
@@ -308,19 +310,19 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     	}
     	super.onDraw(canvas);
     }
-    
+
     @Override
-    protected void dispatchDraw(Canvas canvas) {        
+    protected void dispatchDraw(Canvas canvas) {
     	super.dispatchDraw(canvas);
-        
+
     }
-    
+
     private int getTotalHeaderHeight()
     {
 		return headerViewHeight;
     }
-    
-    private int getNumColumnsCompat() 
+
+    private int getNumColumnsCompat()
     {
         if (Build.VERSION.SDK_INT >= 11) {
             return getNumColumnsCompat11();
@@ -342,8 +344,8 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     private int getNumColumnsCompat11() {
         return getNumColumns();
     }
-    
-    private int getVerticalSpacingCompat() 
+
+    private int getVerticalSpacingCompat()
     {
     	if (Build.VERSION.SDK_INT >= 16) {
             return getVerticalSpacingCompat16();
@@ -351,19 +353,19 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     		return this.verticalSpacing;
     	}
     }
-    	
+
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 	private int getVerticalSpacingCompat16() {
         return getVerticalSpacing();
     }
-    
+
 	@Override
-	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) 
+	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
 		if(this.getAdapter()!=null){
 			int count  = this.getChildCount();
 			int totalHeaderHeight = getTotalHeaderHeight();
-			
+
 			if (count > this.getNumColumnsCompat()) {
                 		View child = this.getChildAt(this.getNumColumnsCompat());
                 		if (child != null) {
@@ -376,15 +378,15 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 		{
 			scrollListenerFromActivity.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Elimina la cabecera
 	 */
-	public void removeHeaderView() 
+	public void removeHeaderView()
 	{
-        if (mHeaderViewInfo != null) 
+        if (mHeaderViewInfo != null)
         {
         	RelativeLayout parent = (RelativeLayout)this.getParent();
             parent.removeView( mHeaderViewInfo.view );
@@ -393,7 +395,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
     }
 
 	@Override
-	public void onScrollStateChanged(AbsListView view, int scrollState) 
+	public void onScrollStateChanged(AbsListView view, int scrollState)
 	{
 		if ( scrollListenerFromActivity != null )
 		{
@@ -402,7 +404,7 @@ public class GridView extends android.widget.GridView implements OnScrollListene
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> adapter, View view, int position, long id) 
+	public void onItemClick(AdapterView<?> adapter, View view, int position, long id)
 	{
 		if ( clickListenerFromActivity != null )
 		{
